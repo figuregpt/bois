@@ -16,40 +16,34 @@ function ProcessStep({ step, index }: { step: typeof steps[0]; index: number }) 
   const inView = useInView(ref, { once: true, margin: "-50px" });
   const isEven = index % 2 === 0;
 
+  const titleBlock = (
+    <div className="md:text-center">
+      <p className="font-serif text-white/50 text-[16px] mb-1">{step.jp}</p>
+      <h3 className="text-[clamp(32px,4vw,56px)] font-bold text-white">{step.title}</h3>
+    </div>
+  );
+
+  const descBlock = (
+    <p className="text-[clamp(16px,1.6vw,22px)] text-white/70 font-serif leading-relaxed">
+      {step.desc}
+    </p>
+  );
+
   return (
     <motion.div
       ref={ref}
-      className="grid grid-cols-1 md:grid-cols-[1fr_1fr] min-h-[50vh] items-center relative"
+      className="grid grid-cols-1 md:grid-cols-[1fr_1fr] min-h-[30vh] md:min-h-[50vh] items-center relative"
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay: 0.1 }}
     >
-      {/* Left column */}
-      <div className="flex flex-col justify-center px-4 md:px-16 py-12">
-        {isEven ? (
-          <div className="md:text-center">
-            <p className="font-serif text-white/50 text-[16px] mb-1">{step.jp}</p>
-            <h3 className="text-[clamp(32px,4vw,56px)] font-bold text-white">{step.title}</h3>
-          </div>
-        ) : (
-          <p className="text-[clamp(18px,1.6vw,22px)] text-white/70 font-serif leading-relaxed">
-            {step.desc}
-          </p>
-        )}
+      {/* On mobile: always title first, desc second */}
+      {/* On desktop: alternate sides */}
+      <div className={`flex flex-col justify-center px-6 md:px-16 pt-8 pb-2 md:py-12 ${!isEven ? "md:order-2" : ""}`}>
+        {titleBlock}
       </div>
-
-      {/* Right column */}
-      <div className="flex flex-col justify-center px-4 md:px-16 py-12">
-        {isEven ? (
-          <p className="text-[clamp(18px,1.6vw,22px)] text-white/70 font-serif leading-relaxed">
-            {step.desc}
-          </p>
-        ) : (
-          <div className="md:text-center">
-            <p className="font-serif text-white/50 text-[16px] mb-1">{step.jp}</p>
-            <h3 className="text-[clamp(32px,4vw,56px)] font-bold text-white">{step.title}</h3>
-          </div>
-        )}
+      <div className={`flex flex-col justify-center px-6 md:px-16 pb-8 pt-2 md:py-12 ${!isEven ? "md:order-1" : ""}`}>
+        {descBlock}
       </div>
     </motion.div>
   );
