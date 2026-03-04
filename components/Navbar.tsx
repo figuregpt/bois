@@ -18,10 +18,15 @@ const allLinks = [...leftLinks, ...rightLinks];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [overSplash, setOverSplash] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+      setOverSplash(window.scrollY < window.innerHeight - 80);
+    };
+    onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -49,22 +54,24 @@ export default function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-page/80 backdrop-blur-xl shadow-[0_1px_0_rgba(0,0,0,0.06)]"
-            : "bg-transparent"
+          overSplash
+            ? "bg-gradient-to-b from-black/40 to-transparent"
+            : scrolled
+              ? "bg-page/80 backdrop-blur-xl shadow-[0_1px_0_rgba(0,0,0,0.06)]"
+              : "bg-transparent"
         }`}
       >
         <div className="container-main h-[72px] flex items-center justify-between">
           {/* Left links */}
           <div className="hidden md:flex items-center gap-1">
             {leftLinks.map((link) =>
-              renderLink(link, "px-4 py-2 text-[13px] text-black/50 hover:text-black transition-colors duration-200")
+              renderLink(link, `px-4 py-2 text-[13px] transition-colors duration-200 ${overSplash ? "text-white/70 hover:text-white" : "text-black/50 hover:text-black"}`)
             )}
           </div>
 
           {/* Center logo */}
           <Link href="#home" className="absolute left-1/2 -translate-x-1/2">
-            <span className="text-black font-extrabold text-xl tracking-[-0.03em] uppercase">
+            <span className={`font-extrabold text-xl tracking-[-0.03em] uppercase transition-colors duration-300 ${overSplash ? "text-white" : "text-black"}`}>
               ZENSAI
             </span>
           </Link>
@@ -72,7 +79,7 @@ export default function Navbar() {
           {/* Right links + CTA */}
           <div className="hidden md:flex items-center gap-1 ml-auto">
             {rightLinks.map((link) =>
-              renderLink(link, "px-4 py-2 text-[13px] text-black/50 hover:text-black transition-colors duration-200")
+              renderLink(link, `px-4 py-2 text-[13px] transition-colors duration-200 ${overSplash ? "text-white/70 hover:text-white" : "text-black/50 hover:text-black"}`)
             )}
           </div>
 
@@ -83,9 +90,9 @@ export default function Navbar() {
             aria-label="Toggle menu"
           >
             <div className="flex flex-col gap-1.5">
-              <span className={`w-5 h-[1.5px] bg-black/70 transition-all duration-300 origin-center ${mobileOpen ? "rotate-45 translate-y-[3.5px]" : ""}`} />
-              <span className={`w-5 h-[1.5px] bg-black/70 transition-all duration-300 ${mobileOpen ? "opacity-0 scale-0" : ""}`} />
-              <span className={`w-5 h-[1.5px] bg-black/70 transition-all duration-300 origin-center ${mobileOpen ? "-rotate-45 -translate-y-[3.5px]" : ""}`} />
+              <span className={`w-5 h-[1.5px] transition-all duration-300 origin-center ${overSplash ? "bg-white/80" : "bg-black/70"} ${mobileOpen ? "rotate-45 translate-y-[3.5px]" : ""}`} />
+              <span className={`w-5 h-[1.5px] transition-all duration-300 ${overSplash ? "bg-white/80" : "bg-black/70"} ${mobileOpen ? "opacity-0 scale-0" : ""}`} />
+              <span className={`w-5 h-[1.5px] transition-all duration-300 origin-center ${overSplash ? "bg-white/80" : "bg-black/70"} ${mobileOpen ? "-rotate-45 -translate-y-[3.5px]" : ""}`} />
             </div>
           </button>
         </div>
