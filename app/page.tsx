@@ -1,20 +1,21 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import HowItWorks from "@/components/HowItWorks";
-import Footer from "@/components/Footer";
-import Splash from "@/components/Splash";
+import KunaiHero from "@/components/KunaiHero";
+import KunaiProcess from "@/components/KunaiProcess";
+import KunaiServices from "@/components/KunaiServices";
+import KunaiLogos from "@/components/KunaiLogos";
+import KunaiFAQ from "@/components/KunaiFAQ";
+import KunaiFooter from "@/components/KunaiFooter";
+import KunaiNav from "@/components/KunaiNav";
 
 export default function Home() {
   return (
     <main className="relative">
-      <Splash />
-      <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-
-      <Footer />
+      <KunaiNav />
+      <KunaiHero />
+      <KunaiProcess />
+      <KunaiServices />
+      <KunaiLogos />
+      <KunaiFAQ />
+      <KunaiFooter />
     </main>
   );
 }

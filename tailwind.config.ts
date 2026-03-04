@@ -8,21 +8,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        page: "#e8e8e8",
+        page: "#dadada",
         dark: "#0a0a0a",
-        accent: {
-          DEFAULT: "#10b981",
-          light: "#34d399",
+        red: {
+          DEFAULT: "#13182B",
+          dark: "#0d1120",
         },
+        accent: {
+          DEFAULT: "#13182B",
+          light: "#1e2540",
+        },
+        light: "#f9f9f8",
       },
       fontFamily: {
-        sans: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "sans-serif",
-        ],
+        sans: ["Satoshi", "sans-serif"],
+        serif: ["Yuji Syuku", "serif"],
       },
     },
   },
