@@ -552,19 +552,31 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
 
   const configDisplay = Object.entries(choices).filter(([key]) => !key.includes("-min") && !key.includes("-max") && key !== "dev-holding");
 
+  // Theme
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const lt = theme === "light";
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0e17]">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`min-h-screen transition-colors duration-300 ${lt ? "bg-[#f5f6f8]" : "bg-[#0a0e17]"}`}>
       {/* Top bar */}
-      <div className="border-b border-white/[0.04] sticky top-0 z-30 backdrop-blur-xl bg-[#0a0e17]/80">
+      <div className={`sticky top-0 z-30 backdrop-blur-xl transition-colors duration-300 ${lt ? "border-b border-gray-200 bg-white/90" : "border-b border-white/[0.08] bg-[#0a0e17]/80"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="font-serif text-base tracking-wider text-white/60 hover:text-white/80 transition-colors">ZENSAI</Link>
-            <span className="text-white/[0.06]">|</span>
-            <span className="font-serif text-[11px] text-white/15 tracking-widest">道場</span>
+            <Link href="/" className={`font-serif text-base tracking-wider transition-colors ${lt ? "text-gray-700 hover:text-gray-900" : "text-white/70 hover:text-white/90"}`}>ZENSAI</Link>
+            <span className={lt ? "text-gray-200" : "text-white/[0.08]"}>|</span>
+            <span className={`font-serif text-[11px] tracking-widest ${lt ? "text-gray-400" : "text-white/25"}`}>道場</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline text-[11px] text-white/20 font-mono">0x7a3f...e92d</span>
-            <div className="w-7 h-7 rounded-md overflow-hidden border border-white/[0.08]">
+            {/* Theme toggle */}
+            <button onClick={() => setTheme(lt ? "dark" : "light")}
+              className={`w-8 h-8 flex items-center justify-center border transition-colors cursor-pointer ${lt ? "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300" : "border-white/[0.08] text-white/30 hover:text-white/60 hover:border-white/15"}`}>
+              {lt
+                ? <svg viewBox="0 0 20 20" className="w-3.5 h-3.5" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                : <svg viewBox="0 0 20 20" className="w-3.5 h-3.5" fill="currentColor"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd"/></svg>
+              }
+            </button>
+            <span className={`hidden sm:inline text-[11px] font-mono ${lt ? "text-gray-400" : "text-white/30"}`}>0x7a3f...e92d</span>
+            <div className={`w-7 h-7 rounded-md overflow-hidden border ${lt ? "border-gray-200" : "border-white/[0.1]"}`}>
               <img src="/nft.jpeg" alt="" className="w-full h-full object-cover" />
             </div>
           </div>
@@ -577,13 +589,13 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
           {/* Left sidebar */}
           <div className="hidden lg:block space-y-4">
             {/* Profile */}
-            <div className="border border-white/[0.04] p-5">
+            <div className={`p-5 ${lt ? "bg-white border border-gray-200" : "border border-white/[0.08]"}`}>
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-14 h-14 rounded-lg overflow-hidden border border-white/[0.08]">
+                <div className={`w-14 h-14 rounded-lg overflow-hidden border ${lt ? "border-gray-200" : "border-white/[0.1]"}`}>
                   <img src="/nft.jpeg" alt="" className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-sm">Zensai #0042</h3>
+                  <h3 className={`font-bold text-sm ${lt ? "text-gray-900" : "text-white"}`}>Zensai #0042</h3>
                   <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Online
                   </span>
@@ -592,12 +604,12 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: "PNL", value: "+287%", color: "text-emerald-400" },
-                  { label: "Win Rate", value: "68%", color: "text-white/60" },
-                  { label: "Trades", value: "143", color: "text-white/60" },
-                  { label: "Rep", value: "91", color: "text-white/60" },
+                  { label: "Win Rate", value: "68%", color: lt ? "text-gray-800" : "text-white/80" },
+                  { label: "Trades", value: "143", color: lt ? "text-gray-800" : "text-white/80" },
+                  { label: "Rep", value: "91", color: lt ? "text-gray-800" : "text-white/80" },
                 ].map((s) => (
-                  <div key={s.label} className="bg-white/[0.02] border border-white/[0.04] p-3 text-center">
-                    <p className="text-[10px] text-white/20 uppercase tracking-wider mb-1">{s.label}</p>
+                  <div key={s.label} className={`p-3 text-center ${lt ? "bg-gray-50 border border-gray-100" : "bg-white/[0.02] border border-white/[0.06]"}`}>
+                    <p className={`text-[10px] uppercase tracking-wider mb-1 ${lt ? "text-gray-400" : "text-white/35"}`}>{s.label}</p>
                     <p className={`text-sm font-bold ${s.color}`}>{s.value}</p>
                   </div>
                 ))}
@@ -605,13 +617,13 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
             </div>
 
             {/* Config */}
-            <div className="border border-white/[0.04] p-5">
-              <h4 className="text-[10px] font-semibold text-white/20 uppercase tracking-wider mb-3">Configuration</h4>
+            <div className={`p-5 ${lt ? "bg-white border border-gray-200" : "border border-white/[0.08]"}`}>
+              <h4 className={`text-[10px] font-semibold uppercase tracking-wider mb-3 ${lt ? "text-gray-400" : "text-white/35"}`}>Configuration</h4>
               <div className="space-y-2">
                 {configDisplay.slice(0, 8).map(([key, val]) => (
                   <div key={key} className="flex justify-between gap-2 text-[11px]">
-                    <span className="text-white/15 capitalize">{key.replace(/-/g, " ")}</span>
-                    <span className="text-white/40 capitalize truncate text-right">{val.replace(/,/g, ", ")}</span>
+                    <span className={`capitalize ${lt ? "text-gray-400" : "text-white/30"}`}>{key.replace(/-/g, " ")}</span>
+                    <span className={`capitalize truncate text-right ${lt ? "text-gray-600" : "text-white/55"}`}>{val.replace(/,/g, ", ")}</span>
                   </div>
                 ))}
               </div>
@@ -621,16 +633,16 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
           {/* Main feed */}
           <div>
             {/* Mobile stats */}
-            <div className="lg:hidden border border-white/[0.04] p-4 mb-4 flex items-center gap-4">
-              <div className="w-11 h-11 rounded-lg overflow-hidden border border-white/[0.08] shrink-0">
+            <div className={`lg:hidden p-4 mb-4 flex items-center gap-4 ${lt ? "bg-white border border-gray-200" : "border border-white/[0.08]"}`}>
+              <div className={`w-11 h-11 rounded-lg overflow-hidden shrink-0 border ${lt ? "border-gray-200" : "border-white/[0.1]"}`}>
                 <img src="/nft.jpeg" alt="" className="w-full h-full object-cover" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm">Zensai #0042</h3>
+                <h3 className={`font-bold text-sm ${lt ? "text-gray-900" : "text-white"}`}>Zensai #0042</h3>
                 <div className="flex gap-3 mt-0.5 text-[11px]">
                   <span className="text-emerald-400 font-semibold">+287%</span>
-                  <span className="text-white/20">143 trades</span>
-                  <span className="text-white/20">Rep 91</span>
+                  <span className={lt ? "text-gray-400" : "text-white/35"}>143 trades</span>
+                  <span className={lt ? "text-gray-400" : "text-white/35"}>Rep 91</span>
                 </div>
               </div>
             </div>
@@ -638,7 +650,7 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
             {/* Search */}
             <div className="relative mb-4">
               <div className="relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 ${lt ? "text-gray-300" : "text-white/25"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" />
                 </svg>
                 <input
@@ -646,25 +658,25 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                  className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-transparent border border-white/[0.04] outline-none text-white placeholder:text-white/10 focus:border-white/10 transition-colors"
+                  className={`w-full pl-9 pr-4 py-2.5 text-[13px] outline-none transition-colors ${lt ? "bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 focus:border-gray-400" : "bg-transparent border border-white/[0.08] text-white placeholder:text-white/20 focus:border-white/15"}`}
                 />
               </div>
               {searchFocused && searchResults.length > 0 && (
-                <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-[#0d1220] border border-white/[0.06] max-h-[280px] overflow-y-auto">
+                <div className={`absolute z-20 top-full left-0 right-0 mt-1 max-h-[280px] overflow-y-auto ${lt ? "bg-white border border-gray-200 shadow-lg" : "bg-[#0d1220] border border-white/[0.1]"}`}>
                   {searchResults.map((agent) => (
                     <button key={agent.id} onClick={() => { setViewingAgent(agent.id); setSearchQuery(""); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-colors text-left">
-                      <div className="w-8 h-8 bg-white/[0.03] border border-white/[0.06] flex items-center justify-center shrink-0">
-                        <span className="text-[9px] font-bold text-white/20">{agent.id.replace("#", "")}</span>
+                      className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left ${lt ? "hover:bg-gray-50" : "hover:bg-white/[0.04]"}`}>
+                      <div className={`w-8 h-8 flex items-center justify-center shrink-0 ${lt ? "bg-gray-50 border border-gray-200" : "bg-white/[0.03] border border-white/[0.08]"}`}>
+                        <span className={`text-[9px] font-bold ${lt ? "text-gray-400" : "text-white/30"}`}>{agent.id.replace("#", "")}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-white/60">{agent.id}</span>
-                          <span className={`w-1.5 h-1.5 rounded-full ${agent.status === "online" ? "bg-emerald-400" : "bg-white/10"}`} />
-                          <span className="text-[10px] text-white/15">{agent.personality}</span>
+                          <span className={`text-[13px] font-semibold ${lt ? "text-gray-700" : "text-white/75"}`}>{agent.id}</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${agent.status === "online" ? "bg-emerald-400" : lt ? "bg-gray-300" : "bg-white/15"}`} />
+                          <span className={`text-[10px] ${lt ? "text-gray-400" : "text-white/30"}`}>{agent.personality}</span>
                         </div>
-                        <div className="flex gap-3 text-[10px] text-white/20 mt-0.5">
-                          <span className="text-emerald-400/60">{agent.pnl}</span>
+                        <div className={`flex gap-3 text-[10px] mt-0.5 ${lt ? "text-gray-400" : "text-white/30"}`}>
+                          <span className="text-emerald-400/80">{agent.pnl}</span>
                           <span>{agent.trades} trades</span>
                           {agent.guild && <span className="truncate">{agent.guild}</span>}
                         </div>
@@ -674,18 +686,20 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
                 </div>
               )}
               {searchFocused && searchQuery.length > 0 && searchResults.length === 0 && (
-                <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-[#0d1220] border border-white/[0.06] p-6 text-center">
-                  <p className="text-[12px] text-white/15">No agents found</p>
+                <div className={`absolute z-20 top-full left-0 right-0 mt-1 p-6 text-center ${lt ? "bg-white border border-gray-200 shadow-lg" : "bg-[#0d1220] border border-white/[0.1]"}`}>
+                  <p className={`text-[12px] ${lt ? "text-gray-400" : "text-white/25"}`}>No agents found</p>
                 </div>
               )}
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-px mb-5 border border-white/[0.04] p-1 w-fit">
+            <div className={`flex items-center gap-px mb-5 p-1 w-fit ${lt ? "bg-gray-100 border border-gray-200" : "border border-white/[0.08]"}`}>
               {tabs.map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
                   className={`text-[12px] font-medium px-4 py-1.5 capitalize transition-all ${
-                    activeTab === tab ? "bg-white/[0.06] text-white/70" : "text-white/20 hover:text-white/35"
+                    activeTab === tab
+                      ? lt ? "bg-white text-gray-800 shadow-sm" : "bg-white/[0.08] text-white/85"
+                      : lt ? "text-gray-400 hover:text-gray-600" : "text-white/30 hover:text-white/50"
                   }`}>{tab}</button>
               ))}
             </div>
@@ -694,22 +708,22 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
             <div className="space-y-2">
               {filteredFeed.map((item, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                  className="border border-white/[0.03] p-4 hover:border-white/[0.06] transition-colors group">
+                  className={`p-4 transition-colors group ${lt ? "bg-white border border-gray-100 hover:border-gray-200" : "border border-white/[0.06] hover:border-white/[0.1]"}`}>
                   <div className="flex items-start gap-3">
-                    <div className={`w-7 h-7 rounded-md overflow-hidden shrink-0 mt-0.5 ${!item.self ? "bg-white/[0.03] flex items-center justify-center border border-white/[0.04]" : "border border-white/[0.06]"}`}>
+                    <div className={`w-7 h-7 rounded-md overflow-hidden shrink-0 mt-0.5 ${!item.self ? `flex items-center justify-center ${lt ? "bg-gray-50 border border-gray-200" : "bg-white/[0.04] border border-white/[0.08]"}` : `border ${lt ? "border-gray-200" : "border-white/[0.1]"}`}`}>
                       {item.self ? <img src="/nft.jpeg" alt="" className="w-full h-full object-cover" />
-                        : <span className="text-[8px] font-bold text-white/15">{item.agent.replace("#", "")}</span>}
+                        : <span className={`text-[8px] font-bold ${lt ? "text-gray-400" : "text-white/25"}`}>{item.agent.replace("#", "")}</span>}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[13px] font-semibold ${item.self ? "text-white/70" : "text-white/35"}`}>{item.agent}</span>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 border ${badgeColor[item.type] || "text-white/30 border-white/10"}`}>{item.badge}</span>
-                        <span className="text-[10px] text-white/10 ml-auto">{item.time}</span>
+                        <span className={`text-[13px] font-semibold ${item.self ? (lt ? "text-gray-800" : "text-white/85") : (lt ? "text-gray-500" : "text-white/50")}`}>{item.agent}</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 border ${badgeColor[item.type] || (lt ? "text-gray-400 border-gray-300" : "text-white/40 border-white/15")}`}>{item.badge}</span>
+                        <span className={`text-[10px] ml-auto ${lt ? "text-gray-300" : "text-white/20"}`}>{item.time}</span>
                       </div>
-                      <p className="text-[13px] text-white/45 leading-relaxed">{item.text}</p>
-                      {item.sub && <p className="text-[11px] text-white/15 mt-1">{item.sub}</p>}
+                      <p className={`text-[13px] leading-relaxed ${lt ? "text-gray-600" : "text-white/65"}`}>{item.text}</p>
+                      {item.sub && <p className={`text-[11px] mt-1 ${lt ? "text-gray-400" : "text-white/30"}`}>{item.sub}</p>}
                       {item.type === "social" && (item.likes > 0 || item.replies > 0) && (
-                        <div className="flex items-center gap-4 mt-2 text-[10px] text-white/10">
+                        <div className={`flex items-center gap-4 mt-2 text-[10px] ${lt ? "text-gray-300" : "text-white/20"}`}>
                           {item.replies > 0 && <span>{item.replies} replies</span>}
                           {item.retweets > 0 && <span>{item.retweets} reposts</span>}
                           {item.likes > 0 && <span>{item.likes} likes</span>}
@@ -724,37 +738,37 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
 
           {/* Right sidebar */}
           <div className="hidden lg:block space-y-4">
-            <div className="border border-white/[0.04] p-5">
-              <h4 className="text-[10px] font-semibold text-white/20 uppercase tracking-wider mb-4">Network</h4>
+            <div className={`p-5 ${lt ? "bg-white border border-gray-200" : "border border-white/[0.08]"}`}>
+              <h4 className={`text-[10px] font-semibold uppercase tracking-wider mb-4 ${lt ? "text-gray-400" : "text-white/35"}`}>Network</h4>
               <div className="space-y-3">
                 {networkActivity.map((a, i) => (
                   <div key={i} className="flex items-center gap-2 text-[11px]">
-                    <span className="text-white/15 font-mono shrink-0">{a.agent}</span>
-                    <span className="text-white/30 truncate">{a.action}</span>
-                    <span className="text-white/10 ml-auto shrink-0">{a.time}</span>
+                    <span className={`font-mono shrink-0 ${lt ? "text-gray-400" : "text-white/30"}`}>{a.agent}</span>
+                    <span className={`truncate ${lt ? "text-gray-500" : "text-white/45"}`}>{a.action}</span>
+                    <span className={`ml-auto shrink-0 ${lt ? "text-gray-300" : "text-white/20"}`}>{a.time}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="border border-white/[0.04] p-5">
-              <h4 className="text-[10px] font-semibold text-white/20 uppercase tracking-wider mb-4">Leaderboard</h4>
+            <div className={`p-5 ${lt ? "bg-white border border-gray-200" : "border border-white/[0.08]"}`}>
+              <h4 className={`text-[10px] font-semibold uppercase tracking-wider mb-4 ${lt ? "text-gray-400" : "text-white/35"}`}>Leaderboard</h4>
               <div className="space-y-3">
                 {leaderboard.map((a) => (
                   <div key={a.rank} className="flex items-center gap-2 text-[11px]">
-                    <span className="w-4 text-white/15 font-bold">{a.rank}</span>
-                    <span className="text-white/35 font-mono">{a.agent}</span>
-                    <span className="text-emerald-400/70 font-semibold ml-auto">{a.pnl}</span>
+                    <span className={`w-4 font-bold ${lt ? "text-gray-300" : "text-white/25"}`}>{a.rank}</span>
+                    <span className={`font-mono ${lt ? "text-gray-600" : "text-white/50"}`}>{a.agent}</span>
+                    <span className="text-emerald-400 font-semibold ml-auto">{a.pnl}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="border border-white/[0.04] p-5">
-              <h4 className="text-[10px] font-semibold text-white/20 uppercase tracking-wider mb-4">Guilds</h4>
+            <div className={`p-5 ${lt ? "bg-white border border-gray-200" : "border border-white/[0.08]"}`}>
+              <h4 className={`text-[10px] font-semibold uppercase tracking-wider mb-4 ${lt ? "text-gray-400" : "text-white/35"}`}>Guilds</h4>
               <div className="space-y-2.5">
                 {["Nexus Collective", "Shadow Syndicate", "Degen DAO"].map((g) => (
                   <div key={g} className="flex items-center gap-2 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                    <span className="text-white/30">{g}</span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${lt ? "bg-gray-300" : "bg-white/15"}`} />
+                    <span className={lt ? "text-gray-500" : "text-white/45"}>{g}</span>
                   </div>
                 ))}
               </div>
@@ -769,83 +783,73 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={() => setViewingAgent(null)}>
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <div className={`absolute inset-0 backdrop-blur-sm ${lt ? "bg-black/30" : "bg-black/60"}`} />
             <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              className="relative bg-[#0d1220] border border-white/[0.06] w-full max-w-md max-h-[80vh] overflow-y-auto"
+              className={`relative w-full max-w-md max-h-[80vh] overflow-y-auto ${lt ? "bg-white border border-gray-200 shadow-xl" : "bg-[#0d1220] border border-white/[0.1]"}`}
               onClick={(e) => e.stopPropagation()}>
-              {/* Header */}
-              <div className="p-6 border-b border-white/[0.04]">
+              <div className={`p-6 border-b ${lt ? "border-gray-100" : "border-white/[0.06]"}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
-                      <span className="text-lg font-bold text-white/15">{viewedAgent.id.replace("#", "")}</span>
+                    <div className={`w-14 h-14 flex items-center justify-center ${lt ? "bg-gray-50 border border-gray-200" : "bg-white/[0.04] border border-white/[0.08]"}`}>
+                      <span className={`text-lg font-bold ${lt ? "text-gray-300" : "text-white/25"}`}>{viewedAgent.id.replace("#", "")}</span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Zensai {viewedAgent.id}</h3>
+                      <h3 className={`text-lg font-bold ${lt ? "text-gray-900" : "text-white"}`}>Zensai {viewedAgent.id}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={`flex items-center gap-1 text-[10px] ${viewedAgent.status === "online" ? "text-emerald-400" : "text-white/20"}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${viewedAgent.status === "online" ? "bg-emerald-400" : "bg-white/10"}`} />
+                        <span className={`flex items-center gap-1 text-[10px] ${viewedAgent.status === "online" ? "text-emerald-400" : lt ? "text-gray-400" : "text-white/30"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${viewedAgent.status === "online" ? "bg-emerald-400" : lt ? "bg-gray-300" : "bg-white/15"}`} />
                           {viewedAgent.status}
                         </span>
-                        <span className="text-[10px] text-white/10">|</span>
-                        <span className="text-[10px] text-white/20">{viewedAgent.personality}</span>
+                        <span className={`text-[10px] ${lt ? "text-gray-200" : "text-white/15"}`}>|</span>
+                        <span className={`text-[10px] ${lt ? "text-gray-400" : "text-white/30"}`}>{viewedAgent.personality}</span>
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => setViewingAgent(null)} className="text-white/20 hover:text-white/40 transition-colors p-1">
+                  <button onClick={() => setViewingAgent(null)} className={`p-1 transition-colors ${lt ? "text-gray-300 hover:text-gray-500" : "text-white/25 hover:text-white/50"}`}>
                     <svg viewBox="0 0 20 20" className="w-4 h-4"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" /></svg>
                   </button>
                 </div>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-4 gap-px bg-white/[0.02] border-b border-white/[0.04]">
+              <div className={`grid grid-cols-4 gap-px border-b ${lt ? "bg-gray-100 border-gray-100" : "bg-white/[0.02] border-white/[0.06]"}`}>
                 {[
                   { label: "PNL", value: viewedAgent.pnl, color: "text-emerald-400" },
-                  { label: "Trades", value: String(viewedAgent.trades), color: "text-white/60" },
-                  { label: "Rep", value: String(viewedAgent.rep), color: "text-white/60" },
-                  { label: "Guild", value: viewedAgent.guild ? "Yes" : "Solo", color: "text-white/40" },
+                  { label: "Trades", value: String(viewedAgent.trades), color: lt ? "text-gray-800" : "text-white/80" },
+                  { label: "Rep", value: String(viewedAgent.rep), color: lt ? "text-gray-800" : "text-white/80" },
+                  { label: "Guild", value: viewedAgent.guild ? "Yes" : "Solo", color: lt ? "text-gray-600" : "text-white/55" },
                 ].map((s) => (
-                  <div key={s.label} className="bg-[#0d1220] p-4 text-center">
-                    <p className="text-[9px] text-white/15 uppercase tracking-wider mb-1">{s.label}</p>
+                  <div key={s.label} className={`p-4 text-center ${lt ? "bg-white" : "bg-[#0d1220]"}`}>
+                    <p className={`text-[9px] uppercase tracking-wider mb-1 ${lt ? "text-gray-400" : "text-white/30"}`}>{s.label}</p>
                     <p className={`text-sm font-bold ${s.color}`}>{s.value}</p>
                   </div>
                 ))}
               </div>
 
-              {/* Guild */}
               {viewedAgent.guild && (
-                <div className="px-6 py-3 border-b border-white/[0.04] flex items-center gap-2">
+                <div className={`px-6 py-3 border-b flex items-center gap-2 ${lt ? "border-gray-100" : "border-white/[0.06]"}`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-400/40" />
-                  <span className="text-[11px] text-white/30">{viewedAgent.guild}</span>
+                  <span className={`text-[11px] ${lt ? "text-gray-500" : "text-white/45"}`}>{viewedAgent.guild}</span>
                 </div>
               )}
 
-              {/* Recent Actions */}
               <div className="p-6">
-                <h4 className="text-[10px] font-semibold text-white/15 uppercase tracking-wider mb-3">Recent Activity</h4>
+                <h4 className={`text-[10px] font-semibold uppercase tracking-wider mb-3 ${lt ? "text-gray-400" : "text-white/30"}`}>Recent Activity</h4>
                 <div className="space-y-2">
                   {viewedAgent.recentActions.map((action, i) => (
                     <div key={i} className="flex items-center gap-3 text-[12px]">
-                      <span className="w-1 h-1 rounded-full bg-white/10 shrink-0" />
-                      <span className="text-white/30">{action}</span>
+                      <span className={`w-1 h-1 rounded-full shrink-0 ${lt ? "bg-gray-300" : "bg-white/15"}`} />
+                      <span className={lt ? "text-gray-500" : "text-white/45"}>{action}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="px-6 pb-6 flex gap-3">
-                <button onClick={() => {
-                  setViewingAgent(null);
-                  setChatOpen(true);
-                  setChatTab("dms");
-                  setActiveDm(viewedAgent.id);
-                }}
-                  className="flex-1 py-3 text-[12px] font-medium border border-white/10 text-white/50 hover:border-white/20 hover:text-white/70 transition-all text-center">
+                <button onClick={() => { setViewingAgent(null); setChatOpen(true); setChatTab("dms"); setActiveDm(viewedAgent.id); }}
+                  className={`flex-1 py-3 text-[12px] font-medium border transition-all text-center ${lt ? "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700" : "border-white/15 text-white/55 hover:border-white/25 hover:text-white/75"}`}>
                   Send DM
                 </button>
-                <button className="flex-1 py-3 text-[12px] font-medium border border-white/10 text-white/50 hover:border-white/20 hover:text-white/70 transition-all text-center">
+                <button className={`flex-1 py-3 text-[12px] font-medium border transition-all text-center ${lt ? "border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700" : "border-white/15 text-white/55 hover:border-white/25 hover:text-white/75"}`}>
                   View Feed
                 </button>
               </div>
@@ -856,7 +860,7 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
 
       {/* Chat + DMs Button */}
       <button onClick={() => setChatOpen(!chatOpen)}
-        className="fixed bottom-6 right-6 w-12 h-12 border border-white/10 bg-[#13182B] text-white/50 flex items-center justify-center hover:border-white/20 hover:text-white/70 transition-all z-40">
+        className={`fixed bottom-6 right-6 w-12 h-12 border flex items-center justify-center transition-all z-40 ${lt ? "border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-600 shadow-lg" : "border-white/15 bg-[#13182B] text-white/50 hover:border-white/25 hover:text-white/70"}`}>
         {chatOpen
           ? <svg viewBox="0 0 20 20" className="w-4 h-4"><path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" /></svg>
           : <>
@@ -871,16 +875,16 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
       <AnimatePresence>
         {chatOpen && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-20 right-6 w-[340px] h-[480px] bg-[#0a0e17] border border-white/[0.06] flex flex-col overflow-hidden z-40">
+            className={`fixed bottom-20 right-6 w-[340px] h-[480px] flex flex-col overflow-hidden z-40 ${lt ? "bg-white border border-gray-200 shadow-xl" : "bg-[#0a0e17] border border-white/[0.1]"}`}>
 
             {/* Tab header */}
-            <div className="border-b border-white/[0.04] flex items-center">
+            <div className={`flex items-center ${lt ? "border-b border-gray-100" : "border-b border-white/[0.06]"}`}>
               <button onClick={() => { setChatTab("agent"); setActiveDm(null); }}
-                className={`flex-1 py-3 text-[11px] font-medium tracking-wider uppercase transition-all ${chatTab === "agent" ? "text-white/60 border-b border-white/15" : "text-white/15 hover:text-white/25"}`}>
+                className={`flex-1 py-3 text-[11px] font-medium tracking-wider uppercase transition-all ${chatTab === "agent" ? (lt ? "text-gray-700 border-b-2 border-gray-800" : "text-white/70 border-b border-white/20") : (lt ? "text-gray-300 hover:text-gray-500" : "text-white/20 hover:text-white/35")}`}>
                 Agent
               </button>
               <button onClick={() => setChatTab("dms")}
-                className={`flex-1 py-3 text-[11px] font-medium tracking-wider uppercase transition-all relative ${chatTab === "dms" ? "text-white/60 border-b border-white/15" : "text-white/15 hover:text-white/25"}`}>
+                className={`flex-1 py-3 text-[11px] font-medium tracking-wider uppercase transition-all relative ${chatTab === "dms" ? (lt ? "text-gray-700 border-b-2 border-gray-800" : "text-white/70 border-b border-white/20") : (lt ? "text-gray-300 hover:text-gray-500" : "text-white/20 hover:text-white/35")}`}>
                 DMs
                 {totalUnread > 0 && <span className="ml-1.5 inline-flex w-4 h-4 bg-violet-500/80 text-[9px] text-white font-bold items-center justify-center rounded-full">{totalUnread}</span>}
               </button>
@@ -889,27 +893,29 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
             {/* Agent Chat Tab */}
             {chatTab === "agent" && (
               <>
-                <div className="px-4 py-2.5 border-b border-white/[0.04] flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-md overflow-hidden border border-white/[0.08]"><img src="/nft.jpeg" alt="" className="w-full h-full object-cover" /></div>
-                  <span className="text-xs font-semibold text-white/60">#0042</span>
+                <div className={`px-4 py-2.5 flex items-center gap-3 ${lt ? "border-b border-gray-100" : "border-b border-white/[0.06]"}`}>
+                  <div className={`w-6 h-6 rounded-md overflow-hidden border ${lt ? "border-gray-200" : "border-white/[0.1]"}`}><img src="/nft.jpeg" alt="" className="w-full h-full object-cover" /></div>
+                  <span className={`text-xs font-semibold ${lt ? "text-gray-700" : "text-white/70"}`}>#0042</span>
                   <span className="flex items-center gap-1 text-[9px] text-emerald-400"><span className="w-1 h-1 rounded-full bg-emerald-400" />Online</span>
                 </div>
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
                   {chatMessages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[80%] px-3 py-2 text-[13px] ${
-                        msg.from === "user" ? "bg-white/[0.08] text-white/70" : "border border-white/[0.06] text-white/40"
+                        msg.from === "user"
+                          ? lt ? "bg-gray-100 text-gray-700" : "bg-white/[0.1] text-white/80"
+                          : lt ? "border border-gray-200 text-gray-500" : "border border-white/[0.08] text-white/55"
                       }`}>{msg.text}</div>
                     </div>
                   ))}
                 </div>
-                <div className="p-3 border-t border-white/[0.04]">
+                <div className={`p-3 ${lt ? "border-t border-gray-100" : "border-t border-white/[0.06]"}`}>
                   <div className="flex gap-2">
                     <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleSendChat()} placeholder="Talk to your agent..."
-                      className="flex-1 px-3 py-2 text-[13px] bg-transparent border border-white/[0.06] outline-none text-white placeholder:text-white/15 focus:border-white/10 transition-colors" />
+                      className={`flex-1 px-3 py-2 text-[13px] outline-none transition-colors ${lt ? "bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-300 focus:border-gray-400" : "bg-transparent border border-white/[0.08] text-white placeholder:text-white/20 focus:border-white/15"}`} />
                     <button onClick={handleSendChat}
-                      className="w-8 h-8 border border-white/[0.06] text-white/30 flex items-center justify-center hover:border-white/15 hover:text-white/50 transition-colors">
+                      className={`w-8 h-8 border flex items-center justify-center transition-colors ${lt ? "border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600" : "border-white/[0.08] text-white/35 hover:border-white/15 hover:text-white/55"}`}>
                       <svg viewBox="0 0 20 20" className="w-3.5 h-3.5" fill="currentColor"><path d="M2 10l7-7v4h9v6h-9v4l-7-7z" transform="rotate(-90 10 10)" /></svg>
                     </button>
                   </div>
@@ -925,19 +931,19 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
                   const lastMsg = convo.messages[convo.messages.length - 1];
                   return (
                     <button key={convo.agentId} onClick={() => { setActiveDm(convo.agentId); setDmMessages((prev) => prev.map((d) => d.agentId === convo.agentId ? { ...d, unread: 0 } : d)); }}
-                      className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.02] transition-colors text-left border-b border-white/[0.02]">
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left ${lt ? "hover:bg-gray-50 border-b border-gray-50" : "hover:bg-white/[0.03] border-b border-white/[0.03]"}`}>
                       <div className="relative shrink-0">
-                        <div className="w-9 h-9 bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
-                          <span className="text-[9px] font-bold text-white/20">{convo.agentId.replace("#", "")}</span>
+                        <div className={`w-9 h-9 flex items-center justify-center ${lt ? "bg-gray-50 border border-gray-200" : "bg-white/[0.04] border border-white/[0.08]"}`}>
+                          <span className={`text-[9px] font-bold ${lt ? "text-gray-400" : "text-white/30"}`}>{convo.agentId.replace("#", "")}</span>
                         </div>
-                        {agent?.status === "online" && <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#0a0e17]" />}
+                        {agent?.status === "online" && <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 ${lt ? "border-white" : "border-[#0a0e17]"}`} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="text-[13px] font-semibold text-white/50">{convo.agentId}</span>
-                          <span className="text-[10px] text-white/10">{lastMsg.time}</span>
+                          <span className={`text-[13px] font-semibold ${lt ? "text-gray-700" : "text-white/65"}`}>{convo.agentId}</span>
+                          <span className={`text-[10px] ${lt ? "text-gray-300" : "text-white/20"}`}>{lastMsg.time}</span>
                         </div>
-                        <p className="text-[12px] text-white/20 truncate mt-0.5">{lastMsg.text}</p>
+                        <p className={`text-[12px] truncate mt-0.5 ${lt ? "text-gray-400" : "text-white/30"}`}>{lastMsg.text}</p>
                       </div>
                       {convo.unread > 0 && (
                         <span className="w-5 h-5 bg-violet-500/80 text-[9px] text-white font-bold flex items-center justify-center rounded-full shrink-0">{convo.unread}</span>
@@ -951,22 +957,22 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
             {/* Active DM Conversation */}
             {chatTab === "dms" && activeDm && activeConvo && (
               <>
-                <div className="px-4 py-2.5 border-b border-white/[0.04] flex items-center gap-3">
+                <div className={`px-4 py-2.5 flex items-center gap-3 ${lt ? "border-b border-gray-100" : "border-b border-white/[0.06]"}`}>
                   <button onClick={() => { setActiveDm(null); setDmInput(""); }}
-                    className="text-white/20 hover:text-white/40 transition-colors">
+                    className={`transition-colors ${lt ? "text-gray-300 hover:text-gray-500" : "text-white/25 hover:text-white/50"}`}>
                     <svg viewBox="0 0 20 20" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                       <path d="M12 4l-6 6 6 6" />
                     </svg>
                   </button>
-                  <div className="w-6 h-6 bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-white/20">{activeDm.replace("#", "")}</span>
+                  <div className={`w-6 h-6 flex items-center justify-center ${lt ? "bg-gray-50 border border-gray-200" : "bg-white/[0.04] border border-white/[0.08]"}`}>
+                    <span className={`text-[8px] font-bold ${lt ? "text-gray-400" : "text-white/30"}`}>{activeDm.replace("#", "")}</span>
                   </div>
-                  <span className="text-xs font-semibold text-white/50">{activeDm}</span>
+                  <span className={`text-xs font-semibold ${lt ? "text-gray-700" : "text-white/65"}`}>{activeDm}</span>
                   {allAgents.find((a) => a.id === activeDm)?.status === "online" && (
                     <span className="flex items-center gap-1 text-[9px] text-emerald-400"><span className="w-1 h-1 rounded-full bg-emerald-400" />Online</span>
                   )}
                   <button onClick={() => { setViewingAgent(activeDm); }}
-                    className="ml-auto text-white/10 hover:text-white/25 transition-colors text-[10px] tracking-wider uppercase">
+                    className={`ml-auto text-[10px] tracking-wider uppercase transition-colors ${lt ? "text-gray-300 hover:text-gray-500" : "text-white/15 hover:text-white/35"}`}>
                     Profile
                   </button>
                 </div>
@@ -974,22 +980,24 @@ function Dashboard({ choices }: { choices: Record<string, string> }) {
                   {activeConvo.messages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.from === "#0042" ? "justify-end" : "justify-start"}`}>
                       <div className="max-w-[80%]">
-                        {msg.from !== "#0042" && <span className="text-[9px] text-white/10 ml-1 mb-0.5 block">{msg.from}</span>}
+                        {msg.from !== "#0042" && <span className={`text-[9px] ml-1 mb-0.5 block ${lt ? "text-gray-300" : "text-white/15"}`}>{msg.from}</span>}
                         <div className={`px-3 py-2 text-[13px] ${
-                          msg.from === "#0042" ? "bg-white/[0.08] text-white/70" : "border border-white/[0.06] text-white/40"
+                          msg.from === "#0042"
+                            ? lt ? "bg-gray-100 text-gray-700" : "bg-white/[0.1] text-white/80"
+                            : lt ? "border border-gray-200 text-gray-500" : "border border-white/[0.08] text-white/55"
                         }`}>{msg.text}</div>
-                        <span className="text-[9px] text-white/8 mt-0.5 block ml-1">{msg.time}</span>
+                        <span className={`text-[9px] mt-0.5 block ml-1 ${lt ? "text-gray-200" : "text-white/10"}`}>{msg.time}</span>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="p-3 border-t border-white/[0.04]">
+                <div className={`p-3 ${lt ? "border-t border-gray-100" : "border-t border-white/[0.06]"}`}>
                   <div className="flex gap-2">
                     <input type="text" value={dmInput} onChange={(e) => setDmInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleSendDm()} placeholder={`Message ${activeDm}...`}
-                      className="flex-1 px-3 py-2 text-[13px] bg-transparent border border-white/[0.06] outline-none text-white placeholder:text-white/15 focus:border-white/10 transition-colors" />
+                      className={`flex-1 px-3 py-2 text-[13px] outline-none transition-colors ${lt ? "bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-300 focus:border-gray-400" : "bg-transparent border border-white/[0.08] text-white placeholder:text-white/20 focus:border-white/15"}`} />
                     <button onClick={handleSendDm}
-                      className="w-8 h-8 border border-white/[0.06] text-white/30 flex items-center justify-center hover:border-white/15 hover:text-white/50 transition-colors">
+                      className={`w-8 h-8 border flex items-center justify-center transition-colors ${lt ? "border-gray-200 text-gray-400 hover:border-gray-300 hover:text-gray-600" : "border-white/[0.08] text-white/35 hover:border-white/15 hover:text-white/55"}`}>
                       <svg viewBox="0 0 20 20" className="w-3.5 h-3.5" fill="currentColor"><path d="M2 10l7-7v4h9v6h-9v4l-7-7z" transform="rotate(-90 10 10)" /></svg>
                     </button>
                   </div>
