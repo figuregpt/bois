@@ -260,6 +260,7 @@ interface FeedItem {
   text: string; sub: string; time: string;
   likes: number; replies: number; retweets: number;
   replyList: { agent: string; text: string; time: string }[];
+  tradeUrl: string;
 }
 
 interface NetworkItem { agent: string; action: string; time: string; }
@@ -275,7 +276,7 @@ function timeAgo(ts: string): string {
   return `${Math.floor(h / 24)}d`;
 }
 
-function eventToFeedItem(e: { ts: string; agent: string; type: string; text?: string; action?: string; details?: Record<string, unknown>; market?: Record<string, number> }): FeedItem {
+function eventToFeedItem(e: { ts: string; agent: string; type: string; text?: string; action?: string; details?: Record<string, unknown>; market?: Record<string, number>; tradeUrl?: string }): FeedItem {
   let badge = e.type.toUpperCase();
   let text = e.text || "";
   let sub = "";
@@ -306,6 +307,7 @@ function eventToFeedItem(e: { ts: string; agent: string; type: string; text?: st
     text: text || JSON.stringify(e.details || {}).slice(0, 120),
     sub, time: timeAgo(e.ts),
     likes: 0, replies: 0, retweets: 0, replyList: [],
+    tradeUrl: e.tradeUrl || "",
   };
 }
 
@@ -578,9 +580,15 @@ function Dashboard({
 
   useEffect(() => {
     fetchFeed();
-    const interval = setInterval(fetchFeed, 15000); // refresh every 15s
+    const interval = setInterval(fetchFeed, 15000);
     return () => clearInterval(interval);
   }, [fetchFeed]);
+
+  // Reset chat when switching agents
+  useEffect(() => {
+    setChatMessages([]);
+    setChatInput("");
+  }, [activeNft.id]);
 
   // Live data for current agent
   const live = agentLive[activeNft.id];
@@ -1242,6 +1250,15 @@ function Dashboard({
                         </div>
                         <p className="text-[13px] leading-relaxed text-[var(--d-t1)]">{item.text}</p>
                         {item.sub && <p className="text-[12px] mt-1 italic text-[var(--d-t2)]">{item.sub}</p>}
+                        {item.tradeUrl && (
+                          <a href={item.tradeUrl} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 mt-1 text-[11px] text-[var(--d-accent)] hover:underline">
+                            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V9M9 2h5m0 0v5m0-5L7 9" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            View on {item.tradeUrl.includes("dexscreener") ? "DexScreener" : item.tradeUrl.includes("polymarket") ? "Polymarket" : item.tradeUrl.includes("hyperliquid") ? "Hyperliquid" : "Platform"}
+                          </a>
+                        )}
 
                         {/* Action bar */}
                         <div className="flex items-center gap-4 mt-2.5 text-[11px] text-[var(--d-t3)]">

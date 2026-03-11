@@ -52,12 +52,13 @@ export function createRouter(agents: Map<string, BaseAgent>): Router {
           mark: `$${currentPrice.toFixed(2)}`,
           pnl: `${posPnl >= 0 ? "+" : ""}$${posPnl.toFixed(0)}`,
           pnlPercent: `${posPnlPct >= 0 ? "+" : ""}${posPnlPct.toFixed(1)}%`,
+          tradeUrl: pos.tradeUrl || "",
         };
       });
 
       // Holdings value (meme tokens bought with SOL)
       const formattedHoldings = Object.entries(p.holdings).map(([symbol, h]) => {
-        const value = h.amount * market.prices.SOL;
+        const value = h.amount * (market.prices.SOL || 180);
         totalValue += value;
         return {
           symbol,
@@ -66,6 +67,7 @@ export function createRouter(agents: Map<string, BaseAgent>): Router {
           value: `$${value.toFixed(0)}`,
           pnl: "---",
           pnlPercent: "---",
+          dexUrl: h.dexUrl || "",
         };
       });
 
@@ -76,12 +78,13 @@ export function createRouter(agents: Map<string, BaseAgent>): Router {
         const betPnl = (currentPrice - bet.avgPrice) * bet.shares;
         totalValue += currentPrice * bet.shares;
         return {
-          question: pm?.question || bet.marketId,
+          question: pm?.question || bet.question || bet.marketId,
           outcome: bet.outcome,
           shares: bet.shares,
           avgPrice: `$${bet.avgPrice.toFixed(2)}`,
           currentPrice: `$${currentPrice.toFixed(2)}`,
           pnl: `${betPnl >= 0 ? "+" : ""}$${betPnl.toFixed(1)}`,
+          polyUrl: bet.polyUrl || pm?.polyUrl || "",
         };
       });
 
