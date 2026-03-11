@@ -105,7 +105,7 @@ RESPONSE FORMAT (always JSON):
 ];
 
 export function createInitialMemory(agentId: string): AgentMemory {
-  const startCash = agentId === "#0042" ? 5000 : agentId === "#1337" ? 1000 : 500;
+  const startCash = 1000;
   return {
     recentDecisions: [],
     observations: [],
