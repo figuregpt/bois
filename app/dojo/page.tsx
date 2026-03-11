@@ -495,7 +495,7 @@ function Dashboard({
   const [chatMessages, setChatMessages] = useState<{ from: "agent" | "user"; text: string }[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
 
-  const [bagTab, setBagTab] = useState<"tokens" | "perps" | "bets">("tokens");
+  const [bagTab, setBagTab] = useState<"tokens" | "perps" | "bets" | "history">("tokens");
   const [mobilePanel, setMobilePanel] = useState<"nfts" | "plugins" | "bag" | "network" | "leaderboard" | null>(null);
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyInput, setReplyInput] = useState("");
@@ -509,30 +509,66 @@ function Dashboard({
   const [networkActivity, setNetworkActivity] = useState<NetworkItem[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderItem[]>([]);
 
+  // Live agent data (bags, PNL, trade history) from API
+  interface AgentLiveData {
+    pnl: string; pnlPercent: string; trades: number; cash: number; totalValue: number;
+    holdings: TokenHolding[]; positions: LeveragedPosition[]; bets: PolymarketBet[];
+    recentEvents: { ts: string; agent: string; type: string; text?: string; action?: string; details?: Record<string, unknown> }[];
+  }
+  const [agentLive, setAgentLive] = useState<Record<string, AgentLiveData>>({});
+
   const fetchFeed = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/feed?limit=50`);
-      const data = await res.json();
+      const [feedRes, agentsRes] = await Promise.all([
+        fetch(`${API_URL}/api/feed?limit=50`),
+        fetch(`${API_URL}/api/agents`),
+      ]);
+      const data = await feedRes.json();
+      const agentsData = await agentsRes.json();
+
+      // Feed items
       const items: FeedItem[] = (data.events || []).reverse().map(eventToFeedItem);
       setFeedItems(items);
 
-      // Build network activity from last events
+      // Network activity from last events
       const net: NetworkItem[] = (data.events || []).slice(-8).reverse().map((e: { agent: string; type: string; text?: string; action?: string; ts: string }) => ({
         agent: e.agent,
-        action: e.type === "trade" ? (e.action || "traded") : e.type === "post" ? "posted" : e.text?.slice(0, 30) || "observing",
+        action: e.type === "trade" ? (e.action || "traded") : e.type === "post" ? "posted" : e.type === "dm" ? "DM sent" : e.text?.slice(0, 30) || "observing",
         time: timeAgo(e.ts),
       }));
       setNetworkActivity(net);
 
-      // Build leaderboard from agents
-      const agentsRes = await fetch(`${API_URL}/api/agents`);
-      const agentsData = await agentsRes.json();
-      const lb: LeaderItem[] = (agentsData.agents || [])
-        .sort((a: { decisions: number }, b: { decisions: number }) => b.decisions - a.decisions)
-        .map((a: { id: string; decisions: number; portfolio: { cash: number } | null }, i: number) => ({
+      // Agent live data — bags, PNL, trade history
+      const live: Record<string, AgentLiveData> = {};
+      const agents = agentsData.agents || [];
+      for (const a of agents) {
+        live[a.id] = {
+          pnl: a.pnl || "$0",
+          pnlPercent: a.pnlPercent || "0%",
+          trades: a.trades || 0,
+          cash: a.cash || 0,
+          totalValue: a.totalValue || 0,
+          holdings: (a.holdings || []).map((h: { symbol: string; name: string; amount: string; value: string; pnl: string; pnlPercent: string }) => ({
+            symbol: h.symbol, name: h.name, amount: h.amount, value: h.value, pnl: h.pnl || "---", pnlPercent: h.pnlPercent || "---",
+          })),
+          positions: (a.positions || []).map((p: { pair: string; direction: string; leverage: string; size: string; entry: string; mark: string; pnl: string; pnlPercent: string }) => ({
+            pair: p.pair, direction: p.direction as "long" | "short", leverage: p.leverage, size: p.size, entry: p.entry, mark: p.mark, pnl: p.pnl, pnlPercent: p.pnlPercent,
+          })),
+          bets: (a.bets || []).map((b: { question: string; outcome: string; shares: number; avgPrice: string; currentPrice: string; pnl: string }) => ({
+            question: b.question, outcome: b.outcome, shares: b.shares, avgPrice: b.avgPrice, currentPrice: b.currentPrice, pnl: b.pnl,
+          })),
+          recentEvents: a.recentEvents || [],
+        };
+      }
+      setAgentLive(live);
+
+      // Leaderboard — sorted by PNL
+      const lb: LeaderItem[] = agents
+        .sort((a: { totalValue: number }, b: { totalValue: number }) => (b.totalValue || 0) - (a.totalValue || 0))
+        .map((a: { id: string; pnl: string }, i: number) => ({
           rank: i + 1,
           agent: a.id,
-          pnl: a.portfolio ? `$${Math.floor(a.portfolio.cash)}` : "---",
+          pnl: a.pnl || "$0",
         }));
       setLeaderboard(lb);
     } catch {
@@ -545,6 +581,13 @@ function Dashboard({
     const interval = setInterval(fetchFeed, 15000); // refresh every 15s
     return () => clearInterval(interval);
   }, [fetchFeed]);
+
+  // Live data for current agent
+  const live = agentLive[activeNft.id];
+  const liveHoldings = live?.holdings || [];
+  const livePositions = live?.positions || [];
+  const liveBets = live?.bets || [];
+  const liveEvents = live?.recentEvents || [];
 
   const installedIds = activeNft.plugins.map((p) => p.pluginId);
   const filteredPlugins = pluginFilter === "all" ? availablePlugins : availablePlugins.filter((p) => p.category === pluginFilter);
@@ -716,10 +759,10 @@ function Dashboard({
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { label: "PNL", value: activeNft.pnl, color: activeNft.pnl.startsWith("+") ? "text-emerald-600" : "text-[var(--d-t1)]" },
-                      { label: "Win Rate", value: activeNft.winRate, color: "text-[var(--d-t1)]" },
-                      { label: "Trades", value: String(activeNft.trades), color: "text-[var(--d-t1)]" },
-                      { label: "Rep", value: String(activeNft.rep), color: "text-[var(--d-t1)]" },
+                      { label: "PNL", value: live?.pnl || "---", color: (live?.pnl || "").startsWith("+") ? "text-emerald-600" : (live?.pnl || "").startsWith("-") ? "text-red-500" : "text-[var(--d-t1)]" },
+                      { label: "Value", value: live ? `$${live.totalValue}` : "---", color: "text-[var(--d-t1)]" },
+                      { label: "Trades", value: live ? String(live.trades) : "0", color: "text-[var(--d-t1)]" },
+                      { label: "Cash", value: live ? `$${live.cash}` : "---", color: "text-[var(--d-t1)]" },
                     ].map((s) => (
                       <div key={s.label} className="p-3 text-center bg-[var(--d-subtle)] border border-[var(--d-border)]">
                         <p className="text-[11px] uppercase tracking-wider mb-1 text-[var(--d-t3)]">{s.label}</p>
@@ -776,25 +819,32 @@ function Dashboard({
                 <div className="p-5 bg-[var(--d-card)] border border-[var(--d-border)]">
                   <h4 className="text-[11px] font-semibold uppercase tracking-wider mb-3 text-[var(--d-t3)]">Bag</h4>
                   <div className="flex items-center gap-px mb-3 p-0.5 bg-[var(--d-subtle2)] border border-[var(--d-border)]">
-                    {(["tokens", "perps", "bets"] as const).map((t) => (
+                    {(["tokens", "perps", "bets", "history"] as const).map((t) => (
                       <button key={t} onClick={() => setBagTab(t)}
                         className={`flex-1 text-[11px] font-medium py-1 capitalize transition-all ${
                           bagTab === t ? "bg-[var(--d-input)] text-[var(--d-t1)] shadow-sm" : "text-[var(--d-t3)] hover:text-[var(--d-t2)]"
                         }`}>{t}</button>
                     ))}
                   </div>
+                  {/* Cash balance */}
+                  {live && (
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--d-border)]">
+                      <span className="text-[11px] text-[var(--d-t3)]">Cash</span>
+                      <span className="text-[13px] font-bold text-[var(--d-t1)]">${live.cash}</span>
+                    </div>
+                  )}
                   {bagTab === "tokens" && (
-                    activeNft.holdings.length > 0 ? (
+                    liveHoldings.length > 0 ? (
                       <div className="space-y-2.5">
-                        {activeNft.holdings.map((h) => (
+                        {liveHoldings.map((h) => (
                           <div key={h.symbol}>
                             <div className="flex items-center justify-between">
                               <span className="text-[12px] font-bold text-[var(--d-t1)]">{h.symbol}</span>
-                              <span className={`text-[12px] font-semibold ${h.pnlPercent.startsWith("+") ? "text-emerald-600" : "text-red-500"}`}>{h.pnlPercent}</span>
+                              <span className="text-[12px] font-semibold text-[var(--d-t2)]">{h.value}</span>
                             </div>
                             <div className="flex items-center justify-between mt-0.5">
                               <span className="text-[11px] text-[var(--d-t3)]">{h.amount}</span>
-                              <span className="text-[11px] text-[var(--d-t3)]">{h.value}</span>
+                              <span className="text-[11px] text-[var(--d-t3)]">{h.pnlPercent}</span>
                             </div>
                           </div>
                         ))}
@@ -802,9 +852,9 @@ function Dashboard({
                     ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No tokens held</p>
                   )}
                   {bagTab === "perps" && (
-                    activeNft.positions.length > 0 ? (
+                    livePositions.length > 0 ? (
                       <div className="space-y-2.5">
-                        {activeNft.positions.map((p) => (
+                        {livePositions.map((p) => (
                           <div key={p.pair}>
                             <div className="flex items-center gap-2">
                               <span className="text-[12px] font-bold text-[var(--d-t1)]">{p.pair}</span>
@@ -816,15 +866,19 @@ function Dashboard({
                               <span className="text-[11px] text-[var(--d-t3)]">{p.size} @ {p.entry}</span>
                               <span className={`text-[12px] font-semibold ${p.pnlPercent.startsWith("+") ? "text-emerald-600" : "text-red-500"}`}>{p.pnlPercent}</span>
                             </div>
+                            <div className="flex items-center justify-between mt-0.5">
+                              <span className="text-[11px] text-[var(--d-t3)]">Mark: {p.mark}</span>
+                              <span className={`text-[11px] font-semibold ${p.pnl.startsWith("+") ? "text-emerald-600" : "text-red-500"}`}>{p.pnl}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
                     ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No open positions</p>
                   )}
                   {bagTab === "bets" && (
-                    activeNft.bets.length > 0 ? (
+                    liveBets.length > 0 ? (
                       <div className="space-y-2.5">
-                        {activeNft.bets.map((b, i) => (
+                        {liveBets.map((b, i) => (
                           <div key={i}>
                             <p className="text-[12px] font-medium text-[var(--d-t1)] truncate">{b.question}</p>
                             <div className="flex items-center justify-between mt-0.5">
@@ -833,10 +887,33 @@ function Dashboard({
                               </span>
                               <span className={`text-[12px] font-semibold ${b.pnl.startsWith("+") ? "text-emerald-600" : "text-red-500"}`}>{b.pnl}</span>
                             </div>
+                            <div className="mt-0.5">
+                              <span className="text-[11px] text-[var(--d-t3)]">Now: {b.currentPrice}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
                     ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No active bets</p>
+                  )}
+                  {bagTab === "history" && (
+                    liveEvents.length > 0 ? (
+                      <div className="space-y-2">
+                        {[...liveEvents].reverse().map((ev, i) => (
+                          <div key={i} className="text-[11px] flex items-start gap-2">
+                            <span className={`shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full ${
+                              ev.type === "trade" ? "bg-emerald-500" : ev.type === "post" ? "bg-violet-500" : ev.type === "dm" ? "bg-sky-500" : "bg-amber-400"
+                            }`} />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-semibold text-[var(--d-t1)] uppercase">{ev.type}</span>
+                              <span className="text-[var(--d-t3)] ml-1">{timeAgo(ev.ts)}</span>
+                              <p className="text-[var(--d-t2)] truncate mt-0.5">
+                                {ev.text || (ev.details ? JSON.stringify(ev.details).slice(0, 80) : "---")}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No activity yet</p>
                   )}
                 </div>
               </>
@@ -870,9 +947,9 @@ function Dashboard({
                 <div>
                   <h3 className="font-bold text-[14px] text-[var(--d-t1)]">Zensai {activeNft.id}</h3>
                   <div className="flex gap-3 mt-0.5 text-[12px]">
-                    <span className="text-emerald-600 font-semibold">{activeNft.pnl}</span>
-                    <span className="text-[var(--d-t2)]">{activeNft.trades} trades</span>
-                    <span className="text-[var(--d-t2)]">Rep {activeNft.rep}</span>
+                    <span className={`font-semibold ${(live?.pnl || "").startsWith("+") ? "text-emerald-600" : (live?.pnl || "").startsWith("-") ? "text-red-500" : "text-[var(--d-t2)]"}`}>{live?.pnl || "---"}</span>
+                    <span className="text-[var(--d-t2)]">{live?.trades || 0} trades</span>
+                    <span className="text-[var(--d-t2)]">${live?.cash || 0} cash</span>
                   </div>
                 </div>
               </div>
@@ -964,17 +1041,24 @@ function Dashboard({
                         {mobilePanel === "bag" && (
                           <div className="p-4 bg-[var(--d-card)] border border-[var(--d-border)]">
                             <div className="flex items-center gap-px mb-3 p-0.5 bg-[var(--d-subtle2)] border border-[var(--d-border)]">
-                              {(["tokens", "perps", "bets"] as const).map((t) => (
+                              {(["tokens", "perps", "bets", "history"] as const).map((t) => (
                                 <button key={t} onClick={() => setBagTab(t)}
                                   className={`flex-1 text-[11px] font-medium py-1 capitalize transition-all ${
                                     bagTab === t ? "bg-[var(--d-input)] text-[var(--d-t1)] shadow-sm" : "text-[var(--d-t3)]"
                                   }`}>{t}</button>
                               ))}
                             </div>
+                            {/* Cash balance */}
+                            {live && (
+                              <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--d-border)]">
+                                <span className="text-[11px] text-[var(--d-t3)]">Cash</span>
+                                <span className="text-[13px] font-bold text-[var(--d-t1)]">${live.cash}</span>
+                              </div>
+                            )}
                             {bagTab === "tokens" && (
-                              activeNft.holdings.length > 0 ? (
+                              liveHoldings.length > 0 ? (
                                 <div className="space-y-2.5">
-                                  {activeNft.holdings.map((h) => (
+                                  {liveHoldings.map((h) => (
                                     <div key={h.symbol} className="flex items-center justify-between">
                                       <div>
                                         <span className="text-[12px] font-bold text-[var(--d-t1)]">{h.symbol}</span>
@@ -982,7 +1066,6 @@ function Dashboard({
                                       </div>
                                       <div className="text-right">
                                         <span className="text-[12px] text-[var(--d-t2)]">{h.value}</span>
-                                        <span className={`text-[11px] ml-2 font-semibold ${h.pnlPercent.startsWith("+") ? "text-emerald-600" : "text-red-500"}`}>{h.pnlPercent}</span>
                                       </div>
                                     </div>
                                   ))}
@@ -990,9 +1073,9 @@ function Dashboard({
                               ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No tokens held</p>
                             )}
                             {bagTab === "perps" && (
-                              activeNft.positions.length > 0 ? (
+                              livePositions.length > 0 ? (
                                 <div className="space-y-2.5">
-                                  {activeNft.positions.map((p) => (
+                                  {livePositions.map((p) => (
                                     <div key={p.pair} className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
                                         <span className="text-[12px] font-bold text-[var(--d-t1)]">{p.pair}</span>
@@ -1007,9 +1090,9 @@ function Dashboard({
                               ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No open positions</p>
                             )}
                             {bagTab === "bets" && (
-                              activeNft.bets.length > 0 ? (
+                              liveBets.length > 0 ? (
                                 <div className="space-y-2.5">
-                                  {activeNft.bets.map((b, i) => (
+                                  {liveBets.map((b, i) => (
                                     <div key={i}>
                                       <p className="text-[12px] font-medium text-[var(--d-t1)] truncate">{b.question}</p>
                                       <div className="flex items-center justify-between mt-0.5">
@@ -1022,6 +1105,26 @@ function Dashboard({
                                   ))}
                                 </div>
                               ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No active bets</p>
+                            )}
+                            {bagTab === "history" && (
+                              liveEvents.length > 0 ? (
+                                <div className="space-y-2">
+                                  {[...liveEvents].reverse().map((ev, i) => (
+                                    <div key={i} className="text-[11px] flex items-start gap-2">
+                                      <span className={`shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full ${
+                                        ev.type === "trade" ? "bg-emerald-500" : ev.type === "post" ? "bg-violet-500" : ev.type === "dm" ? "bg-sky-500" : "bg-amber-400"
+                                      }`} />
+                                      <div className="flex-1 min-w-0">
+                                        <span className="font-semibold text-[var(--d-t1)] uppercase">{ev.type}</span>
+                                        <span className="text-[var(--d-t3)] ml-1">{timeAgo(ev.ts)}</span>
+                                        <p className="text-[var(--d-t2)] truncate mt-0.5">
+                                          {ev.text || (ev.details ? JSON.stringify(ev.details).slice(0, 80) : "---")}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : <p className="text-[12px] text-center py-3 italic text-[var(--d-t3)]">No activity yet</p>
                             )}
                           </div>
                         )}

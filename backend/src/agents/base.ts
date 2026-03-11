@@ -98,6 +98,18 @@ export class BaseAgent {
       parts.push(`Bets: ${p.bets.map((b) => `${b.marketId} ${b.outcome} ${b.shares}sh @ ${b.avgPrice}`).join(", ")}`);
     }
 
+    // Other agents on the network
+    const otherAgents = ["#0042", "#1337", "#8421"].filter((id) => id !== this.config.id);
+    parts.push(`\n=== OTHER AGENTS ON NETWORK ===`);
+    parts.push(`Available to DM: ${otherAgents.join(", ")}`);
+
+    // Social nudge — force posts and DMs when agents haven't been social
+    const recentTypes = this.memory.recentDecisions.slice(-5).map((d) => d.type);
+    const hasSocial = recentTypes.includes("post") || recentTypes.includes("dm");
+    if (this.memory.recentDecisions.length >= 3 && !hasSocial) {
+      parts.push("\n⚠️ SOCIAL REQUIREMENT: You haven't posted or DMed in your last several decisions. Your next action MUST be either a 'post' (social update to dojo feed) or a 'dm' (message to another agent). Be social — flex wins, analyze markets, trash talk, react to other agents' moves.");
+    }
+
     parts.push("\n=== WHAT DO YOU DO? Respond with a single JSON action. ===");
 
     return parts.join("\n");

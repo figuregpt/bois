@@ -14,11 +14,82 @@ export function createRouter(agents: Map<string, BaseAgent>): Router {
     res.json({ events });
   });
 
-  // GET /api/agents — all agent statuses
+  // GET /api/agents — all agent statuses with full portfolio + PNL + formatted bags
   router.get("/agents", (_req: Request, res: Response) => {
+    const market = getMarketState();
     const agentList = agentConfigs.map((config) => {
       const agent = agents.get(config.id);
       const mem = agent?.memory;
+      if (!mem) {
+        return {
+          id: config.id, name: config.name, focus: config.focus,
+          personality: config.personality, running: false,
+          pnl: "$0", pnlPercent: "0%", trades: 0, cash: 1000, totalValue: 1000,
+          holdings: [], positions: [], bets: [], recentEvents: [],
+        };
+      }
+
+      const p = mem.portfolio;
+
+      // Calculate total portfolio value
+      let totalValue = p.cash;
+
+      // Positions value
+      const formattedPositions = p.positions.map((pos) => {
+        const baseToken = pos.pair.replace("-PERP", "");
+        const currentPrice = market.prices[baseToken] || pos.entry;
+        const posPnl = pos.direction === "long"
+          ? (currentPrice - pos.entry) / pos.entry * pos.size * pos.leverage
+          : (pos.entry - currentPrice) / pos.entry * pos.size * pos.leverage;
+        const posPnlPct = (posPnl / pos.size) * 100;
+        totalValue += pos.size + posPnl;
+        return {
+          pair: pos.pair,
+          direction: pos.direction,
+          leverage: `${pos.leverage}x`,
+          size: `$${pos.size}`,
+          entry: `$${pos.entry.toFixed(2)}`,
+          mark: `$${currentPrice.toFixed(2)}`,
+          pnl: `${posPnl >= 0 ? "+" : ""}$${posPnl.toFixed(0)}`,
+          pnlPercent: `${posPnlPct >= 0 ? "+" : ""}${posPnlPct.toFixed(1)}%`,
+        };
+      });
+
+      // Holdings value (meme tokens bought with SOL)
+      const formattedHoldings = Object.entries(p.holdings).map(([symbol, h]) => {
+        const value = h.amount * market.prices.SOL;
+        totalValue += value;
+        return {
+          symbol,
+          name: symbol,
+          amount: `${h.amount.toFixed(2)} SOL`,
+          value: `$${value.toFixed(0)}`,
+          pnl: "---",
+          pnlPercent: "---",
+        };
+      });
+
+      // Bets value
+      const formattedBets = p.bets.map((bet) => {
+        const pm = market.polymarketMarkets.find((m) => m.id === bet.marketId);
+        const currentPrice = pm ? pm.yesPrice : bet.avgPrice;
+        const betPnl = (currentPrice - bet.avgPrice) * bet.shares;
+        totalValue += currentPrice * bet.shares;
+        return {
+          question: pm?.question || bet.marketId,
+          outcome: bet.outcome,
+          shares: bet.shares,
+          avgPrice: `$${bet.avgPrice.toFixed(2)}`,
+          currentPrice: `$${currentPrice.toFixed(2)}`,
+          pnl: `${betPnl >= 0 ? "+" : ""}$${betPnl.toFixed(1)}`,
+        };
+      });
+
+      const pnl = totalValue - 1000;
+      const pnlPercent = (pnl / 1000) * 100;
+      const tradeCount = mem.recentDecisions.filter((d) => d.type === "trade").length;
+      const recentEvents = getEventsForAgent(config.id, 20);
+
       return {
         id: config.id,
         name: config.name,
@@ -26,13 +97,16 @@ export function createRouter(agents: Map<string, BaseAgent>): Router {
         personality: config.personality,
         running: agent?.running || false,
         intervalMs: config.intervalMs,
-        decisions: mem?.recentDecisions.length || 0,
-        portfolio: mem ? {
-          cash: mem.portfolio.cash,
-          positions: mem.portfolio.positions.length,
-          holdings: Object.keys(mem.portfolio.holdings).length,
-          bets: mem.portfolio.bets.length,
-        } : null,
+        decisions: mem.recentDecisions.length,
+        trades: tradeCount,
+        cash: Math.floor(p.cash),
+        totalValue: Math.floor(totalValue),
+        pnl: `${pnl >= 0 ? "+" : ""}$${Math.floor(pnl)}`,
+        pnlPercent: `${pnlPercent >= 0 ? "+" : ""}${pnlPercent.toFixed(1)}%`,
+        holdings: formattedHoldings,
+        positions: formattedPositions,
+        bets: formattedBets,
+        recentEvents,
       };
     });
     res.json({ agents: agentList });
