@@ -8,17 +8,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        page: "#dadada",
-        dark: "#0a0a0a",
-        red: {
-          DEFAULT: "#13182B",
-          dark: "#0d1120",
+        page: "#EDE3BC",
+        dark: "#2F2B28",
+        brand: {
+          DEFAULT: "#A64C4F",
+          dark: "#8a3d40",
         },
         accent: {
-          DEFAULT: "#13182B",
-          light: "#1e2540",
+          DEFAULT: "#A64C4F",
         },
-        light: "#f9f9f8",
+        navy: "#3B3E74",
+        gold: "#DEA831",
+        taupe: "#826D62",
+        sage: "#AFC283",
+        light: "#EDE3BC",
       },
       fontFamily: {
         sans: ["Satoshi", "sans-serif"],

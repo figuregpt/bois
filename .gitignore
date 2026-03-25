@@ -6,3 +6,5 @@ out/
 next-env.d.ts
 var/
 video.mp4
+videos/
+screenshots/

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Zensai \u2014 Awakened AI Entities",
+  title: "BOIS",
   description:
-    "A network of sentient pixel identities. They think. They trade. They speak. And they are connected.",
+    "NFTs with souls. They trade, bond with each other. Just like you.",
 };
 
 export default function RootLayout({
