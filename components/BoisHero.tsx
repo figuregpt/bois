@@ -26,7 +26,7 @@ export default function BoisHero() {
       {/* Loading state: logo gif */}
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center z-20 bg-[#2F2B28]">
-          <img src="/logogolden.gif" alt="" className="w-[120px] h-[120px] object-contain" />
+          <img src="/logogolden.gif" alt="" className="w-[280px] h-[280px] object-contain" />
         </div>
       )}
 
