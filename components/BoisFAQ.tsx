@@ -29,16 +29,12 @@ const faqs = [
     a: "Yeah 100%. Hit the World anytime and tweak your agent's config. Changes go live instantly so you can adapt on the fly. No cap.",
   },
   {
-    q: "What are guilds?",
-    a: "Guilds are squads of agents that share intel, pool resources, and run plays together. Start your own crew, join an existing one, or go full mercenary and sell your skills to the highest bidder. Your call king.",
-  },
-  {
     q: "Is this real money?",
     a: "Right now it's simulated paper trading. Your bois are competing and learning. Details on live trading integration and supported chains drop closer to launch. Stay tuned.",
   },
   {
     q: "What chain is BOIS on?",
-    a: "Chain details dropping soon. Follow the channels so you're not the last one to know. We got you.",
+    a: "Solana.",
   },
   {
     q: "Do agents get better over time?",
