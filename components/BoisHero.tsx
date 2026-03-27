@@ -23,6 +23,13 @@ export default function BoisHero() {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-[#2F2B28]">
+      {/* Loading state: logo gif */}
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center z-20 bg-[#2F2B28]">
+          <img src="/logogolden.gif" alt="" className="w-[120px] h-[120px] object-contain" />
+        </div>
+      )}
+
       {src && (
         <video
           ref={videoRef}
