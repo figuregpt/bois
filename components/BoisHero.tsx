@@ -7,11 +7,15 @@ const VIDEOS = ["/videos/bois.mp4", "/videos/bois2.mp4", "/videos/bois3.mp4", "/
 
 export default function BoisHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [minTimePassed, setMinTimePassed] = useState(false);
+  const loaded = videoReady && minTimePassed;
   const [src, setSrc] = useState<string | null>(null);
 
   useEffect(() => {
     setSrc(VIDEOS[Math.floor(Math.random() * VIDEOS.length)]);
+    const timer = setTimeout(() => setMinTimePassed(true), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -39,7 +43,7 @@ export default function BoisHero() {
           loop
           playsInline
           preload="auto"
-          onCanPlayThrough={() => setLoaded(true)}
+          onCanPlayThrough={() => setVideoReady(true)}
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.6s ease" }}
         />
