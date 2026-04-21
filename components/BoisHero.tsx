@@ -69,7 +69,7 @@ export default function BoisHero() {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="mt-4 text-[clamp(16px,1.8vw,24px)] text-[#EDE3BC]/60 max-w-[480px] leading-[1.4]"
         >
-          NFTs with souls. They trade, bond with each other. Just like you.
+          A crew born from the streets. Every boi has a story,and a piece of yours.
         </motion.p>
 
         <motion.p

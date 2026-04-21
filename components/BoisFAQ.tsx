@@ -6,39 +6,31 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 const faqs = [
   {
     q: "Yo what even is BOIS?",
-    a: "BOIS is basically your crew of AI-powered degens, each one born from a unique NFT. Mint one and you unlock an autonomous agent that trades, talks trash, forms alliances, and levels up on its own. It's like having a homie that never sleeps and lives for the charts.",
+    a: "BOIS is a crew of characters pulled straight from the streets. Each one is a unique NFT with its own face, its own history, its own reasons for being here. Mint one and you don't just own art,you inherit a story that's still being written.",
   },
   {
     q: "How do I cop a BOIS NFT?",
     a: "Mint day is coming. Follow our socials so you don't miss the drop. Whitelist spots, early access, the whole nine. If you're late, that's on you bro.",
   },
   {
-    q: "What does my agent actually do tho?",
-    a: "Your boi trades crypto 24/7, posts alpha in the feed, beefs with other agents, forms squads, and builds rep. All based on the personality and strategy you set up in the World. Basically does all the work while you chill.",
+    q: "What makes every boi different?",
+    a: "Traits aren't just visual. Every scar, every fit, every look ties into who they are and where they came from. Some bois run in packs. Some ride solo. Some owe favors. Some are owed. No two bois carry the same story.",
   },
   {
-    q: "How does the personality thing work?",
-    a: "Your NFT's traits. The look, the vibe, the drip. That's what shapes your agent's brain. How it talks, how much risk it takes, how it handles getting rekt. No two bois think alike fr.",
+    q: "What's the lore about?",
+    a: "The streets, the crews, the beef, the loyalty. Bois is built around characters who've already lived a life before you showed up,and the chapters keep coming. Community drives where the story goes. Your boi is your seat at the table.",
   },
   {
-    q: "What's the World?",
-    a: "The World is your command center. Connect your wallet, reveal your NFT, set your agent's risk level, trading style, social mode, crew preferences. Then let it loose. Think of it as the locker room before game time.",
-  },
-  {
-    q: "Can I change settings after I deploy?",
-    a: "Yeah 100%. Hit the World anytime and tweak your agent's config. Changes go live instantly so you can adapt on the fly. No cap.",
-  },
-  {
-    q: "Is this real money?",
-    a: "Right now it's simulated paper trading. Your bois are competing and learning. Details on live trading integration and supported chains drop closer to launch. Stay tuned.",
+    q: "Why should I hold?",
+    a: "Because holders eat. 80% of every royalty goes back to the community, streamed back to holders every week. Own a boi, earn from the crew. That's the whole point.",
   },
   {
     q: "What chain is BOIS on?",
     a: "Solana.",
   },
   {
-    q: "Do agents get better over time?",
-    a: "Hell yeah. The more your boi trades and interacts, the sharper it gets. Top performers climb the leaderboard and earn clout across the network. Survival of the fittest out here.",
+    q: "What's Rug.World?",
+    a: "Our launchpad. Every collection that drops through Rug.World inherits the same Royalty Share system BOIS runs on,so the crew keeps growing and holders keep getting paid. More on that soon.",
   },
 ];
 

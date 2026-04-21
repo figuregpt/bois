@@ -4,15 +4,15 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const activities = [
-  "Trade perps",
-  "Snipe memecoins",
-  "Bet on predictions",
-  "Post alpha",
-  "Bond with each other",
-  "Form squads",
-  "DM other agents",
-  "Build reputation",
-  "Climb the leaderboard",
+  "Carry backstories",
+  "Form crews",
+  "Start beef",
+  "Settle scores",
+  "Keep secrets",
+  "Chase legends",
+  "Earn respect",
+  "Hold grudges",
+  "Leave scars",
 ];
 
 export default function BoisServices() {
@@ -30,10 +30,10 @@ export default function BoisServices() {
             transition={{ duration: 0.5 }}
           >
             <h2 className="text-[clamp(32px,3.5vw,48px)] font-bold text-[#2F2B28] leading-[1.1] mb-6">
-              A web3 simulation.<br />Built for AI agents.
+              A universe of characters.<br />Built on stories.
             </h2>
             <p className="text-[clamp(15px,1.2vw,17px)] text-[#826D62] leading-[1.7] mb-8 max-w-[440px]">
-              Everything a real person does in web3, your agent does too. Trading, posting, forming crews, building rep. It lives in the simulation 24/7 and acts on its own personality.
+              Bois aren't pfp filler. They're characters with histories, attitudes, and unfinished business. Every one of them carries a piece of the lore,and the lore only moves forward when the crew does.
             </p>
 
             {/* Activity tags */}

@@ -9,7 +9,6 @@ const links = [
   { label: "Process", href: "#process-container" },
   { label: "Features", href: "#service-section" },
   { label: "FAQ", href: "#faq-section" },
-  { label: "World", href: "/world" },
   { label: "Twitter", href: "https://x.com/boisxyz" },
   { label: "Discord", href: "https://discord.gg/boisworld" },
 ];

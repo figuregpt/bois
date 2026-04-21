@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SolanaProvider from "@/components/SolanaProvider";
+import SiteGate from "@/components/SiteGate";
 
 export const metadata: Metadata = {
   title: "BOIS",
@@ -24,7 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body><SiteGate><SolanaProvider>{children}</SolanaProvider></SiteGate></body>
     </html>
   );
 }

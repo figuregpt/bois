@@ -99,3 +99,53 @@ export function getCachedTokens(): MemeToken[] {
 export function getLastFetchTime(): number {
   return lastFetch;
 }
+
+// ═══ SEARCH (for terminal page) ═══
+
+export async function searchDexScreenerTokens(query: string): Promise<MemeToken[]> {
+  try {
+    const res = await fetch(`${BASE_URL}/latest/dex/search?q=${encodeURIComponent(query)}`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`DexScreener search ${res.status}`);
+    const data = (await res.json()) as { pairs: DexPair[] };
+
+    const tokenMap = new Map<string, DexPair>();
+    for (const pair of (data.pairs || [])) {
+      if (pair.chainId !== "solana") continue;
+      const addr = pair.baseToken.address;
+      const existing = tokenMap.get(addr);
+      if (!existing || (pair.volume?.h24 || 0) > (existing.volume?.h24 || 0)) {
+        tokenMap.set(addr, pair);
+      }
+    }
+
+    const tokens: MemeToken[] = [];
+    for (const [addr, pair] of tokenMap) {
+      const createdAt = pair.pairCreatedAt || Date.now();
+      const ageMs = Date.now() - createdAt;
+      const ageMin = Math.floor(ageMs / 60000);
+      const launchedAgo = ageMin < 60 ? `${ageMin}m` : ageMin < 1440 ? `${Math.floor(ageMin / 60)}h` : `${Math.floor(ageMin / 1440)}d`;
+
+      tokens.push({
+        symbol: `$${pair.baseToken.symbol}`,
+        name: pair.baseToken.name,
+        address: addr,
+        mcap: pair.marketCap || pair.fdv || 0,
+        volume24h: pair.volume?.h24 || 0,
+        holders: 0,
+        devHolding: 0,
+        top10Holding: 0,
+        priceChange1h: pair.priceChange?.h1 || 0,
+        priceUsd: parseFloat(pair.priceUsd || "0"),
+        launchedAgo,
+        dexUrl: `https://dexscreener.com/solana/${addr}`,
+      });
+    }
+
+    return tokens.sort((a, b) => b.volume24h - a.volume24h).slice(0, 50);
+  } catch (err) {
+    console.error("[DexScreener] Search error:", err);
+    return [];
+  }
+}

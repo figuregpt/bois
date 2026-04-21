@@ -11,7 +11,6 @@ const socials = [
 
 const pages = [
   { label: "Home", href: "/" },
-  { label: "World", href: "/world" },
   { label: "Process", href: "#process-container" },
   { label: "Features", href: "#service-section" },
 ];

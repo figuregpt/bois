@@ -126,3 +126,66 @@ export function getLastFetchTime(): number {
 export function getTradeUrl(symbol: string): string {
   return `https://app.hyperliquid.xyz/trade/${symbol}`;
 }
+
+// ═══ ALL PERPS (for terminal page) ═══
+
+export interface HyperliquidPerp {
+  symbol: string;
+  markPx: number;
+  oraclePx: number;
+  prevDayPx: number;
+  dayNtlVlm: number;
+  funding: number;
+  openInterest: number;
+  change24h: number;
+  tradeUrl: string;
+}
+
+let cachedAllPerps: HyperliquidPerp[] = [];
+let allPerpsLastFetch = 0;
+
+export async function fetchAllPerps(): Promise<HyperliquidPerp[]> {
+  if (Date.now() - allPerpsLastFetch < 30_000 && cachedAllPerps.length > 0) {
+    return cachedAllPerps;
+  }
+  try {
+    const res = await fetch(`${API_URL}/info`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+    });
+    if (!res.ok) throw new Error(`Hyperliquid ${res.status}`);
+    const data = (await res.json()) as [MetaAndCtx["meta"], AssetCtx[]];
+    const meta = data[0];
+    const ctxs = data[1];
+
+    const perps: HyperliquidPerp[] = [];
+    for (let i = 0; i < meta.universe.length; i++) {
+      const name = meta.universe[i].name;
+      const ctx = ctxs[i];
+      if (!ctx) continue;
+      const markPx = parseFloat(ctx.markPx || "0");
+      const prevDayPx = parseFloat(ctx.prevDayPx || "0");
+      if (markPx <= 0) continue;
+
+      perps.push({
+        symbol: name,
+        markPx,
+        oraclePx: parseFloat(ctx.oraclePx || "0"),
+        prevDayPx,
+        dayNtlVlm: parseFloat(ctx.dayNtlVlm || "0"),
+        funding: parseFloat(ctx.funding || "0"),
+        openInterest: parseFloat(ctx.openInterest || "0"),
+        change24h: prevDayPx > 0 ? ((markPx - prevDayPx) / prevDayPx) * 100 : 0,
+        tradeUrl: `https://app.hyperliquid.xyz/trade/${name}`,
+      });
+    }
+
+    cachedAllPerps = perps;
+    allPerpsLastFetch = Date.now();
+    return perps;
+  } catch (err) {
+    console.error("[Hyperliquid] fetchAllPerps error:", err);
+    return cachedAllPerps;
+  }
+}

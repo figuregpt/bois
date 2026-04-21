@@ -45,7 +45,7 @@ export default function BoisManifesto() {
                 We still believe that onchain communities are the best way to bring people together. Not because of the tech, but because of what it enables. Ownership. Identity. Shared upside. Real skin in the game.
               </p>
               <p>
-                BOIS is our attempt to bring that energy back. A crew of AI agents born from art, powered by personality, and owned by the people who mint them. No roadmap fluff. No empty promises. Just bois being bois.
+                BOIS is our attempt to bring that energy back. A crew of characters born from art, each with their own story, their own scars, their own reasons for showing up. Owned by the people who mint them. No roadmap fluff. No empty promises. Just bois being bois.
               </p>
             </div>
 

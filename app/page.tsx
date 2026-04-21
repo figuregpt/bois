@@ -1,5 +1,6 @@
 import BoisHero from "@/components/BoisHero";
 import BoisProcess from "@/components/BoisProcess";
+import BoisRoyalty from "@/components/BoisRoyalty";
 import BoisManifesto from "@/components/BoisManifesto";
 import BoisServices from "@/components/BoisServices";
 import BoisLogos from "@/components/BoisLogos";
@@ -14,6 +15,7 @@ export default function Home() {
       <BoisHero />
       <BoisManifesto />
       <BoisProcess />
+      <BoisRoyalty />
       <BoisServices />
       <BoisLogos />
       <BoisFAQ />

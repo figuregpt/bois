@@ -1,12 +1,18 @@
 export interface AgentEvent {
+  id: string;
   ts: string;
   agent: string;
-  type: "trade" | "post" | "observe" | "dm" | "alert";
+  type: "trade" | "post" | "observe" | "dm" | "alert" | "reply";
   action?: string;
   text?: string;
   details?: Record<string, unknown>;
   market?: Record<string, number>;
   tradeUrl?: string;
+  replyTo?: string; // parent event ID
+  replyToAgent?: string; // agent ID for display
+  replyText?: string;
+  votes: number;
+  moltbookPostId?: string;
 }
 
 export interface MarketState {
@@ -50,10 +56,8 @@ export interface AgentConfig {
   id: string;
   name: string;
   personality: string;
-  systemPrompt: string;
   focus: "perp" | "meme" | "polymarket";
   intervalMs: number;
-  telegramToken?: string;
 }
 
 export interface AgentMemory {
@@ -61,7 +65,7 @@ export interface AgentMemory {
   observations: string[];
   relationships: Record<string, number>;
   portfolio: {
-    holdings: Record<string, { amount: number; avgPrice: number; address?: string; dexUrl?: string }>;
+    holdings: Record<string, { amount: number; avgPrice: number; entryMcap?: number; address?: string; dexUrl?: string }>;
     positions: { pair: string; direction: "long" | "short"; leverage: number; size: number; entry: number; tradeUrl?: string }[];
     bets: { marketId: string; outcome: string; shares: number; avgPrice: number; question?: string; polyUrl?: string }[];
     cash: number;

@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+backend
+var
+*.tsbuildinfo
+.DS_Store
+screenshots
+video.mp4
+videos
+public/*.glb
+public/add_shapekeys.py
+public/*-diagram.*
+public/logo-*.html
+public/zensai-logo.*
